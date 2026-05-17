@@ -7,10 +7,7 @@ import javax.swing.border.EmptyBorder;
 import java.awt.*;
 import java.util.List;
 
-/**
- * Panel que muestra la galería de señas en una cuadrícula.
- * Permite filtrar por categoría y buscar por nombre.
- */
+
 public class GaleriaPanel extends JPanel {
 
     private final SeñaController controller;
@@ -21,11 +18,7 @@ public class GaleriaPanel extends JPanel {
     private JPanel panelCuadricula;
     private JLabel labelContador;
 
-    /**
-     * Constructor principal.
-     * @param controller controlador de la aplicación
-     * @param frame ventana principal
-     */
+   
     public GaleriaPanel(SeñaController controller, MainFrame frame) {
         this.controller = controller;
         this.frame      = frame;
@@ -44,14 +37,12 @@ public class GaleriaPanel extends JPanel {
         JPanel panel = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 5));
         panel.setBorder(BorderFactory.createTitledBorder("Buscar y filtrar"));
 
-        // Campo de búsqueda
         campoBusqueda = new JTextField(20);
         campoBusqueda.setToolTipText("Escribe una letra, número o palabra");
         campoBusqueda.getAccessibleContext()
                      .setAccessibleDescription("Campo de búsqueda de señas");
         campoBusqueda.addActionListener(e -> aplicarFiltro());
 
-        // Combo de categorías
         comboCategoria = new JComboBox<>(new String[]{
             "Todas", "LETRA", "NUMERO", "PALABRA", "FRASE"
         });
@@ -86,8 +77,8 @@ public class GaleriaPanel extends JPanel {
     }
 
     private JScrollPane crearPanelGaleria() {
-        panelCuadricula = new JPanel(new GridLayout(0, 5, 10, 10));
-        panelCuadricula.setBorder(new EmptyBorder(10, 5, 10, 5));
+            panelCuadricula = new JPanel(new GridLayout(0, 4, 10, 10));
+            panelCuadricula.setBorder(new EmptyBorder(10, 5, 10, 5));
 
         JScrollPane scroll = new JScrollPane(panelCuadricula);
         scroll.getVerticalScrollBar().setUnitIncrement(16);
@@ -108,7 +99,6 @@ public class GaleriaPanel extends JPanel {
             resultado = controller.buscar(texto);
         }
 
-        // Validación con mensaje al usuario
         if (resultado.isEmpty()) {
             JOptionPane.showMessageDialog(this,
                 "No se encontraron señas para: \"" + texto + "\"",
@@ -125,24 +115,43 @@ public class GaleriaPanel extends JPanel {
         cargarSeñas(controller.obtenerTodas());
     }
 
-    /**
-     * Carga y muestra las señas en la cuadrícula.
-     * @param señas lista de señas a mostrar
-     */
-    public void cargarSeñas(List<Seña> señas) {
-        panelCuadricula.removeAll();
+   
+     public void cargarSeñas(List<Seña> señas) {
+    panelCuadricula.removeAll();
 
+    if (señas.size() <= 3) {
+        panelCuadricula.setLayout(new FlowLayout(FlowLayout.CENTER, 20, 20));
+        for (Seña seña : señas) {
+            JPanel tarjeta = crearTarjetaSeña(seña);
+            tarjeta.setPreferredSize(new Dimension(220, 260));
+            panelCuadricula.add(tarjeta);
+        }
+    } else {
+        panelCuadricula.setLayout(new GridLayout(0, 4, 10, 10));
         for (Seña seña : señas) {
             panelCuadricula.add(crearTarjetaSeña(seña));
         }
-
-        labelContador.setText("Mostrando " + señas.size() + " seña(s)");
-        panelCuadricula.revalidate();
-        panelCuadricula.repaint();
     }
 
+    labelContador.setText("Mostrando " + señas.size() + " seña(s)");
+    panelCuadricula.revalidate();
+    panelCuadricula.repaint();
+
+    SwingUtilities.invokeLater(() -> {
+        panelCuadricula.revalidate();
+        panelCuadricula.repaint();
+    });
+    
+    // Forzar repintado
+    SwingUtilities.invokeLater(() -> {
+        panelCuadricula.revalidate();
+        panelCuadricula.repaint();
+    });
+}
+
     private JPanel crearTarjetaSeña(Seña seña) {
-        JPanel tarjeta = new JPanel(new BorderLayout(5, 5));
+        JPanel tarjeta = new JPanel();
+        tarjeta.setLayout(new BoxLayout(tarjeta, BoxLayout.Y_AXIS));
         tarjeta.setBorder(BorderFactory.createCompoundBorder(
             BorderFactory.createLineBorder(new Color(220, 220, 220)),
             new EmptyBorder(8, 8, 8, 8)
@@ -150,52 +159,53 @@ public class GaleriaPanel extends JPanel {
         tarjeta.setBackground(Color.WHITE);
         tarjeta.setCursor(new Cursor(Cursor.HAND_CURSOR));
         tarjeta.setToolTipText(seña.getDescripcion());
+        tarjeta.setPreferredSize(new Dimension(160, 190));
 
-        // Imagen o placeholder
-        JLabel labelImagen = new JLabel("", SwingConstants.CENTER);
-        labelImagen.setPreferredSize(new Dimension(100, 100));
+        JLabel labelImagen = new JLabel();
+        labelImagen.setAlignmentX(Component.CENTER_ALIGNMENT);
+        labelImagen.setPreferredSize(new Dimension(110, 110));
+        labelImagen.setMinimumSize(new Dimension(110, 110));
+        labelImagen.setMaximumSize(new Dimension(110, 110));
+
         if (seña.getImagen() != null) {
-            Image img = seña.getImagen().getScaledInstance(90, 90, Image.SCALE_SMOOTH);
-            labelImagen.setIcon(new ImageIcon(img));
+            ImageIcon icon = new ImageIcon(
+                seña.getImagen().getScaledInstance(110, 110, Image.SCALE_SMOOTH)
+            );
+            labelImagen.setIcon(icon);
+            labelImagen.setIcon(icon);
+         labelImagen.setHorizontalAlignment(SwingConstants.CENTER);
+         labelImagen.setVerticalAlignment(SwingConstants.CENTER);
+         labelImagen.revalidate();
+         labelImagen.repaint();
+            System.out.println("Mostrando imagen para: " + seña.getNombre());
         } else {
             labelImagen.setText("📷");
             labelImagen.setFont(new Font("Segoe UI Emoji", Font.PLAIN, 36));
             labelImagen.setForeground(Color.LIGHT_GRAY);
+            labelImagen.setHorizontalAlignment(SwingConstants.CENTER);
         }
 
-        // Nombre
-        JLabel labelNombre = new JLabel(seña.getNombre(), SwingConstants.CENTER);
+        JLabel labelNombre = new JLabel(seña.getNombre());
+        labelNombre.setAlignmentX(Component.CENTER_ALIGNMENT);
         labelNombre.setFont(new Font("Segoe UI", Font.BOLD, 13));
 
-        // Categoría
-        JLabel labelCat = new JLabel(seña.getCategoria().toString(), SwingConstants.CENTER);
+        JLabel labelCat = new JLabel(seña.getCategoria().toString());
+        labelCat.setAlignmentX(Component.CENTER_ALIGNMENT);
         labelCat.setFont(new Font("Segoe UI", Font.PLAIN, 10));
         labelCat.setForeground(Color.GRAY);
 
-        JPanel panelTexto = new JPanel(new GridLayout(2, 1));
-        panelTexto.setOpaque(false);
-        panelTexto.add(labelNombre);
-        panelTexto.add(labelCat);
+        tarjeta.add(Box.createVerticalGlue());
+        tarjeta.add(labelImagen);
+        tarjeta.add(Box.createVerticalStrut(5));
+        tarjeta.add(labelNombre);
+        tarjeta.add(labelCat);
+        tarjeta.add(Box.createVerticalGlue());
 
-        tarjeta.add(labelImagen, BorderLayout.CENTER);
-        tarjeta.add(panelTexto, BorderLayout.SOUTH);
-
-        // Clic → ir al detalle
         tarjeta.addMouseListener(new java.awt.event.MouseAdapter() {
-            @Override
-            public void mouseClicked(java.awt.event.MouseEvent e) {
-                DetalleSeñaPanel detalle = (DetalleSeñaPanel)
-                    frame.getContentPane()
-                         .getComponent(1); // panelContenido
-                // Navegar y mostrar detalle
-                frame.mostrarPanel(MainFrame.PANEL_DETALLE);
-            }
-
             @Override
             public void mouseEntered(java.awt.event.MouseEvent e) {
                 tarjeta.setBackground(new Color(240, 248, 255));
             }
-
             @Override
             public void mouseExited(java.awt.event.MouseEvent e) {
                 tarjeta.setBackground(Color.WHITE);
