@@ -4,10 +4,7 @@ import controller.SeñaController;
 import javax.swing.*;
 import java.awt.*;
 
-/**
- * Ventana principal de la aplicación.
- * Gestiona la navegación entre los paneles usando CardLayout.
- */
+
 public class MainFrame extends JFrame {
 
     private final SeñaController controller;
@@ -19,9 +16,7 @@ public class MainFrame extends JFrame {
     public static final String PANEL_HISTORIAL = "HISTORIAL";
     public static final String PANEL_DETALLE   = "DETALLE";
 
-    /**
-     * Constructor principal — inicializa la ventana y sus paneles.
-     */
+ 
     public MainFrame() {
         this.controller     = new SeñaController();
         this.cardLayout     = new CardLayout();
@@ -44,10 +39,10 @@ public class MainFrame extends JFrame {
     private void construirUI() {
         add(crearBarraNavegacion(), BorderLayout.NORTH);
 
-        panelContenido.add(new GaleriaPanel(controller, this),   PANEL_GALERIA);
-        panelContenido.add(new TraductorPanel(controller, this),  PANEL_TRADUCTOR);
-        panelContenido.add(new HistorialPanel(controller, this),  PANEL_HISTORIAL);
-        panelContenido.add(new DetalleSeñaPanel(controller, this),PANEL_DETALLE);
+        panelContenido.add(new GaleriaPanel(controller, this),    PANEL_GALERIA);
+        panelContenido.add(new TraductorPanel(controller, this),   PANEL_TRADUCTOR);
+        panelContenido.add(new HistorialPanel(controller, this),   PANEL_HISTORIAL);
+        panelContenido.add(new DetalleSeñaPanel(controller, this), PANEL_DETALLE);
 
         add(panelContenido, BorderLayout.CENTER);
         add(crearBarraEstado(), BorderLayout.SOUTH);
@@ -79,8 +74,11 @@ public class MainFrame extends JFrame {
         btnAccesibilidad.setToolTipText("Configurar accesibilidad");
         btnAccesibilidad.getAccessibleContext()
                         .setAccessibleDescription("Abrir configuración de accesibilidad");
-        btnAccesibilidad.addActionListener(e -> 
-                new AccesibilidadConfig(this).setVisible(true));
+
+        JFrame ventanaPadre = this;
+        btnAccesibilidad.addActionListener(e ->
+                new AccesibilidadConfig(ventanaPadre).setVisible(true));
+
         barra.add(btnAccesibilidad);
 
         return barra;
@@ -88,7 +86,7 @@ public class MainFrame extends JFrame {
 
     private JButton crearBotonNav(String texto, String panel) {
         JButton btn = new JButton(texto);
-        btn.setForeground(Color.WHITE);
+        btn.setForeground(Color.YELLOW);
         btn.setBackground(new Color(52, 58, 64));
         btn.setBorderPainted(false);
         btn.setFocusPainted(false);
@@ -104,8 +102,8 @@ public class MainFrame extends JFrame {
     private JPanel crearBarraEstado() {
         JPanel barra = new JPanel(new FlowLayout(FlowLayout.LEFT));
         barra.setBackground(new Color(248, 249, 250));
-        barra.setBorder(BorderFactory.createMatteBorder(1, 0, 0, 0, Color.LIGHT_GRAY));
-        JLabel estado = new JLabel("Total de señas disponibles: " 
+        barra.setBorder(BorderFactory.createMatteBorder(1, 0, 0, 0, Color.BLACK));
+        JLabel estado = new JLabel("Total de señas disponibles: "
                 + controller.totalSeñas());
         estado.setFont(new Font("Segoe UI", Font.PLAIN, 11));
         estado.setForeground(Color.GRAY);
@@ -113,33 +111,24 @@ public class MainFrame extends JFrame {
         return barra;
     }
 
-    /**
-     * Navega al panel indicado por su nombre.
-     * @param nombre nombre del panel destino
-     */
+    
     public void mostrarPanel(String nombre) {
         cardLayout.show(panelContenido, nombre);
     }
 
-    /**
-     * Retorna el controlador compartido entre paneles.
-     * @return instancia del controlador
-     */
+    
     public SeñaController getController() {
         return controller;
     }
 
-    /**
-     * Punto de entrada de la aplicación.
-     * @param args argumentos de línea de comandos
-     */
+   
     public static void main(String[] args) {
         SwingUtilities.invokeLater(() -> {
             try {
                 UIManager.setLookAndFeel(
                     UIManager.getSystemLookAndFeelClassName());
             } catch (Exception e) {
-                System.err.println("No se pudo aplicar LookAndFeel: " 
+                System.err.println("No se pudo aplicar LookAndFeel: "
                         + e.getMessage());
             }
             new MainFrame().setVisible(true);
