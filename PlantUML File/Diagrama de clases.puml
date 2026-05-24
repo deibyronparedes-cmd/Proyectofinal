@@ -1,0 +1,250 @@
+@startuml diagrama_clases
+
+skinparam classAttributeIconSize 0
+skinparam classFontSize 13
+skinparam classBackgroundColor #F8F9FA
+skinparam classBorderColor #343A40
+skinparam arrowColor #343A40
+skinparam packageBackgroundColor #E9ECEF
+
+' ── MODELO ──────────────────────────────────────────────────────────────────
+
+package "model" #DDEEFF {
+
+    enum CategoriaSeña {
+        LETRA
+        NUMERO
+        PALABRA
+        FRASE
+    }
+
+    abstract class Seña {
+        - id : String
+        - nombre : String
+        - categoria : CategoriaSeña
+        - imagen : Image
+        + getId() : String
+        + getNombre() : String
+        + getCategoria() : CategoriaSeña
+        + getImagen() : Image
+        + setImagen(imagen : Image) : void
+        + {abstract} getDescripcion() : String
+        + {abstract} getTextoRepresentacion() : String
+        + toString() : String
+    }
+
+    class LetraSeña {
+        - letra : char
+        + LetraSeña(letra : char)
+        + getDescripcion() : String
+        + getTextoRepresentacion() : String
+        + getLetra() : char
+    }
+
+    class NumeroSeña {
+        - numero : int
+        + NumeroSeña(numero : int)
+        + getDescripcion() : String
+        + getTextoRepresentacion() : String
+        + getNumero() : int
+    }
+
+    class PalabraSeña {
+        - palabra : String
+        - definicion : String
+        + PalabraSeña(palabra : String, definicion : String)
+        + getDescripcion() : String
+        + getTextoRepresentacion() : String
+        + getPalabra() : String
+        + getDefinicion() : String
+    }
+
+    class FraseSeña {
+        - frase : String
+        - contexto : String
+        + FraseSeña(frase : String, contexto : String)
+        + getDescripcion() : String
+        + getTextoRepresentacion() : String
+        + getFrase() : String
+        + getContexto() : String
+    }
+
+    interface ISeñaRepositorio {
+        + buscarPorId(id : String) : Optional<Seña>
+        + buscarPorCategoria(categoria : CategoriaSeña) : List<Seña>
+        + buscarPorNombre(texto : String) : List<Seña>
+        + obtenerTodas() : List<Seña>
+        + contarTotal() : int
+    }
+
+    Seña <|-- LetraSeña
+    Seña <|-- NumeroSeña
+    Seña <|-- PalabraSeña
+    Seña <|-- FraseSeña
+    Seña --> CategoriaSeña
+}
+
+' ── REPOSITORIO ─────────────────────────────────────────────────────────────
+
+package "repository" #DDFFD4 {
+
+    class SeñaRepositorioImpl {
+        - catalogo : Map<String, Seña>
+        + SeñaRepositorioImpl()
+        + buscarPorId(id : String) : Optional<Seña>
+        + buscarPorCategoria(categoria : CategoriaSeña) : List<Seña>
+        + buscarPorNombre(texto : String) : List<Seña>
+        + obtenerTodas() : List<Seña>
+        + contarTotal() : int
+    }
+
+    class ConexionMySQL {
+        - URL : String
+        - USUARIO : String
+        - PASSWORD : String
+        - instancia : ConexionMySQL
+        - conexion : Connection
+        - ConexionMySQL()
+        + {static} getInstance() : ConexionMySQL
+        + getConexion() : Connection
+        + cerrar() : void
+    }
+
+    class HistorialDAO {
+        - conexionMySQL : ConexionMySQL
+        + HistorialDAO()
+        + guardar(entrada : EntradaHistorial) : void
+        + obtenerTodos() : List<String[]>
+        + limpiar() : void
+        + contarRegistros() : int
+    }
+
+    SeñaRepositorioImpl ..|> ISeñaRepositorio
+    HistorialDAO --> ConexionMySQL
+}
+
+' ── CONTROLADOR ─────────────────────────────────────────────────────────────
+
+package "controller" #FFF3CD {
+
+    class SeñaController {
+        - repositorio : SeñaRepositorioImpl
+        - traductor : TextoTraductor
+        - historial : HistorialManager
+        + SeñaController()
+        + obtenerTodas() : List<Seña>
+        + filtrarPorCategoria(categoria : CategoriaSeña) : List<Seña>
+        + buscar(texto : String) : List<Seña>
+        + buscar(texto : String, categoria : CategoriaSeña) : List<Seña>
+        + traducir(texto : String) : List<Seña>
+        + traducir(texto : String, limite : int) : List<Seña>
+        + obtenerHistorial() : List<EntradaHistorial>
+        + limpiarHistorial() : void
+        + totalSeñas() : int
+    }
+
+    class TextoTraductor {
+        - repositorio : SeñaRepositorioImpl
+        + TextoTraductor()
+        + TextoTraductor(repositorio : SeñaRepositorioImpl)
+        + traducirTexto(texto : String) : List<Seña>
+        + traducirTexto(texto : String, limite : int) : List<Seña>
+        + traducirTexto(palabras : List<String>) : List<Seña>
+    }
+
+    class HistorialManager {
+        - historial : LinkedList<EntradaHistorial>
+        + registrar(textoOriginal : String, señas : List<Seña>) : void
+        + registrar(textoOriginal : String) : void
+        + obtenerHistorial() : List<EntradaHistorial>
+        + obtenerHistorial(cantidad : int) : List<EntradaHistorial>
+        + limpiar() : void
+        + contarEntradas() : int
+    }
+
+    class EntradaHistorial {
+        - textoOriginal : String
+        - señas : List<Seña>
+        - fechaHora : String
+        + EntradaHistorial(textoOriginal : String, señas : List<Seña>)
+        + getTextoOriginal() : String
+        + getSeñas() : List<Seña>
+        + getFechaHora() : String
+        + toString() : String
+    }
+
+    SeñaController --> SeñaRepositorioImpl
+    SeñaController --> TextoTraductor
+    SeñaController --> HistorialManager
+    TextoTraductor --> SeñaRepositorioImpl
+    HistorialManager --> EntradaHistorial
+}
+
+' ── VISTA ───────────────────────────────────────────────────────────────────
+
+package "view" #FFE4E1 {
+
+    class MainFrame {
+        - controller : SeñaController
+        - cardLayout : CardLayout
+        - panelContenido : JPanel
+        + {static} PANEL_GALERIA : String
+        + {static} PANEL_TRADUCTOR : String
+        + {static} PANEL_HISTORIAL : String
+        + {static} PANEL_DETALLE : String
+        + MainFrame()
+        + mostrarPanel(nombre : String) : void
+        + getController() : SeñaController
+        + {static} main(args : String[]) : void
+    }
+
+    class GaleriaPanel {
+        - controller : SeñaController
+        - frame : MainFrame
+        + GaleriaPanel(controller : SeñaController, frame : MainFrame)
+        + cargarSeñas(señas : List<Seña>) : void
+    }
+
+    class TraductorPanel {
+        - controller : SeñaController
+        - historialDAO : HistorialDAO
+        + TraductorPanel(controller : SeñaController, frame : MainFrame)
+    }
+
+    class HistorialPanel {
+        - controller : SeñaController
+        - historialDAO : HistorialDAO
+        + HistorialPanel(controller : SeñaController, frame : MainFrame)
+        + cargarHistorial() : void
+    }
+
+    class DetalleSeñaPanel {
+        - controller : SeñaController
+        + DetalleSeñaPanel(controller : SeñaController, frame : MainFrame)
+        + mostrarSeña(seña : Seña) : void
+    }
+
+    class AccesibilidadConfig {
+        - frame : MainFrame
+        - {static} tamañoFuente : int
+        - {static} altoContraste : boolean
+        + AccesibilidadConfig(frame : JFrame)
+        + {static} getTamañoFuente() : int
+        + {static} isAltoContraste() : boolean
+    }
+
+    MainFrame --> SeñaController
+    MainFrame --> GaleriaPanel
+    MainFrame --> TraductorPanel
+    MainFrame --> HistorialPanel
+    MainFrame --> DetalleSeñaPanel
+    GaleriaPanel --> SeñaController
+    TraductorPanel --> SeñaController
+    TraductorPanel --> HistorialDAO
+    HistorialPanel --> SeñaController
+    HistorialPanel --> HistorialDAO
+    DetalleSeñaPanel --> SeñaController
+    AccesibilidadConfig --> MainFrame
+}
+
+@enduml
