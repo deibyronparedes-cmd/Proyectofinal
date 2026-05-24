@@ -6,9 +6,7 @@ import org.junit.jupiter.api.*;
 import java.util.List;
 import static org.junit.jupiter.api.Assertions.*;
 
-/**
- * Pruebas unitarias del TextoTraductor.
- */
+
 class TextoTraductorTest {
 
     private TextoTraductor traductor;

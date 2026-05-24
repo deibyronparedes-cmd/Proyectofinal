@@ -21,13 +21,30 @@ public class HistorialDAO {
     }
 
     /**
+     * Verifica si la conexión está disponible.
+     * @return true si hay conexión activa
+     */
+    private boolean hayConexion() {
+        try {
+            Connection con = conexionMySQL.getConexion();
+            return con != null && !con.isClosed();
+        } catch (SQLException e) {
+            return false;
+        }
+    }
+
+    /**
      * Guarda una entrada del historial en la base de datos.
      * @param entrada entrada a persistir
      */
     public void guardar(EntradaHistorial entrada) {
+        if (!hayConexion()) {
+            System.err.println("Sin conexión MySQL — no se guardó en BD");
+            return;
+        }
         String sql = "INSERT INTO historial_traducciones "
                    + "(texto_original, cantidad_senas) VALUES (?, ?)";
-        try (PreparedStatement ps = 
+        try (PreparedStatement ps =
                 conexionMySQL.getConexion().prepareStatement(sql)) {
             ps.setString(1, entrada.getTextoOriginal());
             ps.setInt(2, entrada.getSeñas().size());
@@ -43,6 +60,10 @@ public class HistorialDAO {
      */
     public List<String[]> obtenerTodos() {
         List<String[]> lista = new ArrayList<>();
+        if (!hayConexion()) {
+            System.err.println("Sin conexión MySQL — historial BD no disponible");
+            return lista;
+        }
         String sql = "SELECT id, texto_original, cantidad_senas, fecha_hora "
                    + "FROM historial_traducciones ORDER BY fecha_hora DESC";
         try (Statement st = conexionMySQL.getConexion().createStatement();
@@ -65,6 +86,7 @@ public class HistorialDAO {
      * Elimina todos los registros del historial.
      */
     public void limpiar() {
+        if (!hayConexion()) return;
         String sql = "DELETE FROM historial_traducciones";
         try (Statement st = conexionMySQL.getConexion().createStatement()) {
             st.executeUpdate(sql);
@@ -78,6 +100,7 @@ public class HistorialDAO {
      * @return cantidad de registros
      */
     public int contarRegistros() {
+        if (!hayConexion()) return 0;
         String sql = "SELECT COUNT(*) FROM historial_traducciones";
         try (Statement st = conexionMySQL.getConexion().createStatement();
              ResultSet rs = st.executeQuery(sql)) {

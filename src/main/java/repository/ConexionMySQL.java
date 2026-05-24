@@ -4,10 +4,7 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 
-/**
- * Gestiona la conexión a la base de datos MySQL.
- * Implementa el patrón Singleton para reutilizar la conexión.
- */
+
 public class ConexionMySQL {
 
     private static final String URL      = "jdbc:mysql://localhost:3306/nueva";
@@ -17,17 +14,12 @@ public class ConexionMySQL {
     private static ConexionMySQL instancia;
     private Connection conexion;
 
-    /**
-     * Constructor privado — patrón Singleton.
-     */
+   
     private ConexionMySQL() {
         conectar();
     }
 
-    /**
-     * Retorna la única instancia de la conexión.
-     * @return instancia Singleton
-     */
+  
     public static ConexionMySQL getInstance() {
         if (instancia == null) {
             instancia = new ConexionMySQL();
@@ -35,9 +27,7 @@ public class ConexionMySQL {
         return instancia;
     }
 
-    /**
-     * Establece la conexión con MySQL.
-     */
+   
     private void conectar() {
         try {
             conexion = DriverManager.getConnection(URL, USUARIO, PASSWORD);
@@ -47,11 +37,7 @@ public class ConexionMySQL {
         }
     }
 
-    /**
-     * Retorna la conexión activa, reconectando si es necesario.
-     * @return objeto Connection
-     * @throws SQLException si no se puede establecer conexión
-     */
+    
     public Connection getConexion() throws SQLException {
         if (conexion == null || conexion.isClosed()) {
             conectar();
@@ -59,9 +45,7 @@ public class ConexionMySQL {
         return conexion;
     }
 
-    /**
-     * Cierra la conexión con la base de datos.
-     */
+    
     public void cerrar() {
         try {
             if (conexion != null && !conexion.isClosed()) {

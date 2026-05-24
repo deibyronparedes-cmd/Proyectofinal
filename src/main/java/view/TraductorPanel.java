@@ -8,10 +8,7 @@ import javax.swing.border.EmptyBorder;
 import java.awt.*;
 import java.util.List;
 
-/**
- * Panel para traducir texto a lengua de señas.
- * Muestra la secuencia de señas correspondiente al texto ingresado.
- */
+
 public class TraductorPanel extends JPanel {
 
     private final SeñaController controller;
@@ -23,11 +20,7 @@ public class TraductorPanel extends JPanel {
     private JLabel labelEstado;
     private JSpinner spinnerLimite;
 
-    /**
-     * Constructor principal.
-     * @param controller controlador de la aplicación
-     * @param frame ventana principal
-     */
+    
     public TraductorPanel(SeñaController controller, MainFrame frame) {
         this.controller  = controller;
         this.frame       = frame;
@@ -146,9 +139,9 @@ public class TraductorPanel extends JPanel {
             List<Seña> señas = controller.traducir(texto, limite);
 
             if (señas.isEmpty()) {
-                JOptionPane.showMessageDialog(this, """
-                                                    No se encontraron se\u00f1as para el texto ingresado.
-                                                    Intenta con letras individuales (A, B, C...).""",
+                JOptionPane.showMessageDialog(this,
+                    "No se encontraron señas para el texto ingresado.\n"
+                    + "Intenta con letras individuales (A, B, C...).",
                     "Sin resultados",
                     JOptionPane.INFORMATION_MESSAGE);
                 labelEstado.setText("Sin resultados para: \"" + texto + "\"");
@@ -165,4 +158,60 @@ public class TraductorPanel extends JPanel {
 
         } catch (IllegalArgumentException ex) {
             JOptionPane.showMessageDialog(this,
-                "Error al traducir: "
+                "Error al traducir: " + ex.getMessage(),
+                "Error",
+                JOptionPane.ERROR_MESSAGE);
+        }
+    }
+
+    private void mostrarResultado(List<Seña> señas, String textoOriginal) {
+        panelResultado.removeAll();
+
+        for (Seña seña : señas) {
+            panelResultado.add(crearTarjetaMini(seña));
+        }
+
+        labelEstado.setText("Traducción de \"" + textoOriginal
+            + "\" → " + señas.size() + " seña(s) encontradas");
+
+        panelResultado.revalidate();
+        panelResultado.repaint();
+    }
+
+    private JPanel crearTarjetaMini(Seña seña) {
+        JPanel tarjeta = new JPanel(new BorderLayout(3, 3));
+        tarjeta.setPreferredSize(new Dimension(90, 110));
+        tarjeta.setBorder(BorderFactory.createCompoundBorder(
+            BorderFactory.createLineBorder(new Color(200, 200, 200)),
+            new EmptyBorder(4, 4, 4, 4)
+        ));
+        tarjeta.setBackground(Color.WHITE);
+        tarjeta.setToolTipText(seña.getDescripcion());
+
+        JLabel labelImagen = new JLabel("", SwingConstants.CENTER);
+        if (seña.getImagen() != null) {
+            Image img = seña.getImagen().getScaledInstance(70, 70, Image.SCALE_SMOOTH);
+            labelImagen.setIcon(new ImageIcon(img));
+        } else {
+            labelImagen.setText("🤟");
+            labelImagen.setFont(new Font("Segoe UI Emoji", Font.PLAIN, 28));
+        }
+
+        JLabel labelNombre = new JLabel(seña.getNombre(), SwingConstants.CENTER);
+        labelNombre.setFont(new Font("Segoe UI", Font.BOLD, 12));
+
+        tarjeta.add(labelImagen, BorderLayout.CENTER);
+        tarjeta.add(labelNombre, BorderLayout.SOUTH);
+
+        return tarjeta;
+    }
+
+    private void limpiar() {
+        campoTexto.setText("");
+        panelResultado.removeAll();
+        panelResultado.revalidate();
+        panelResultado.repaint();
+        labelEstado.setText("Ingresa un texto y presiona Traducir");
+        campoTexto.requestFocus();
+    }
+}

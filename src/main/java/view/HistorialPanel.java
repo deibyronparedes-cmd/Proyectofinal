@@ -9,10 +9,7 @@ import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.util.List;
 
-/**
- * Panel que muestra el historial de traducciones realizadas.
- * Carga datos tanto de la sesión actual como de MySQL.
- */
+
 public class HistorialPanel extends JPanel {
 
     private final SeñaController controller;
@@ -23,11 +20,7 @@ public class HistorialPanel extends JPanel {
     private DefaultTableModel modeloTabla;
     private JLabel labelTotal;
 
-    /**
-     * Constructor principal.
-     * @param controller controlador de la aplicación
-     * @param frame ventana principal
-     */
+
     public HistorialPanel(SeñaController controller, MainFrame frame) {
         this.controller  = controller;
         this.frame       = frame;
@@ -62,7 +55,7 @@ public class HistorialPanel extends JPanel {
 
         JButton btnLimpiar = new JButton("Limpiar historial");
         btnLimpiar.setBackground(new Color(220, 53, 69));
-        btnLimpiar.setForeground(Color.WHITE);
+        btnLimpiar.setForeground(Color.BLACK);
         btnLimpiar.setFocusPainted(false);
         btnLimpiar.setCursor(new Cursor(Cursor.HAND_CURSOR));
         btnLimpiar.setToolTipText("Eliminar todo el historial de traducciones");
@@ -91,8 +84,8 @@ public class HistorialPanel extends JPanel {
         tabla.setGridColor(new Color(230, 230, 230));
         tabla.setSelectionBackground(new Color(173, 216, 230));
         tabla.getTableHeader().setFont(new Font("Segoe UI", Font.BOLD, 13));
-        tabla.getTableHeader().setBackground(new Color(33, 37, 41));
-        tabla.getTableHeader().setForeground(Color.WHITE);
+        tabla.getTableHeader().setBackground(new Color(173, 216, 230));
+        tabla.getTableHeader().setForeground(Color.BLACK);
         tabla.getAccessibleContext()
              .setAccessibleDescription("Tabla con el historial de traducciones realizadas");
 
@@ -119,9 +112,7 @@ public class HistorialPanel extends JPanel {
         return panel;
     }
 
-    /**
-     * Carga el historial combinando sesión actual y registros de MySQL.
-     */
+    
     public void cargarHistorial() {
         modeloTabla.setRowCount(0);
 

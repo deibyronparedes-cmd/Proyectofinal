@@ -15,13 +15,13 @@ public abstract class Seña {
         this.categoria = categoria;
     }
 
-    // Método abstracto: cada subclase define su descripción
+ 
     public abstract String getDescripcion();
 
-    // Método abstracto: cada subclase define cómo se representa en texto
+   
     public abstract String getTextoRepresentacion();
 
-    // Getters
+   
     public String getId() { return id; }
     public String getNombre() { return nombre; }
     public CategoriaSeña getCategoria() { return categoria; }

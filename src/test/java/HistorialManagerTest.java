@@ -7,9 +7,8 @@ import java.util.ArrayList;
 import java.util.List;
 import static org.junit.jupiter.api.Assertions.*;
 
-/**
- * Pruebas unitarias del HistorialManager.
- */
+
+
 class HistorialManagerTest {
 
     private HistorialManager historial;
